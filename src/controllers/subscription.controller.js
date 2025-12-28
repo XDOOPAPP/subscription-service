@@ -7,6 +7,12 @@ class SubscriptionController {
     res.json(plans);
   };
 
+  // [GET] /api/v1/subscriptions/current
+  getCurrent = async (req, res) => {
+    // req.user = { userId: "user_001" };
+    const sub = await subscriptionService.getCurrent(req.user.userId);
+    res.json(sub);
+  };
 
 
 }
