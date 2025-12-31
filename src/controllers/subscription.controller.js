@@ -9,9 +9,19 @@ class SubscriptionController {
 
   // [GET] /api/v1/subscriptions/current
   getCurrent = async (req, res) => {
-    // req.user = { userId: "user_001" };
     const sub = await subscriptionService.getCurrent(req.user.userId);
     res.json(sub);
+  };
+
+  // [POST] /api/v1/subscriptions
+  subscribe = async (req, res) => {
+    const userId = "user_005";
+    const planId = "6951600b0f1ca05fb93cbfe7" 
+    const sub = await subscriptionService.subscribe(
+      userId,
+      planId
+    );
+    res.status(201).json(sub);
   };
 
 

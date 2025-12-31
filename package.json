@@ -19,6 +19,7 @@
   "homepage": "https://github.com/XDOOPAPP/subscription-service#readme",
   "description": "",
   "dependencies": {
+    "amqplib": "^0.10.9",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",

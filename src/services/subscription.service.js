@@ -1,5 +1,7 @@
 const planRepository = require("../repositories/plan.repository");
 const subscriptionRepository = require("../repositories/subscription.repository");
+const AppError = require("../utils/appError");
+const STATUS = require("../constants/subscription-status");
 
 class SubscriptionService {
   async getPlans() {
@@ -9,6 +11,56 @@ class SubscriptionService {
   async getCurrent(userId) {
     return subscriptionRepository.findActiveByUser(userId);
   }
+
+  async subscribe(userId, planId) {
+    if (!planId) {
+      throw new AppError("planId is required", 400);
+    }
+
+    const plan = await planRepository.findById(planId);
+    if (!plan || !plan.isActive) {
+      throw new AppError("Plan not found or inactive", 404);
+    }
+
+    const activeSub = await subscriptionRepository.findActiveByUser(userId);
+    if (activeSub) {
+      throw new AppError("User already has an active subscription", 409);
+    }
+
+    const now = new Date();
+    const endDate = this._calculateEndDate(now, plan.interval);
+
+    return subscriptionRepository.create({
+      userId,
+      planId,
+      status: STATUS.ACTIVE,
+      startDate: now,
+      endDate,
+    });
+  }
+
+  _calculateEndDate(startDate, interval) {
+    const end = new Date(startDate);
+
+    switch (interval) {
+      case "MONTHLY":
+        end.setMonth(end.getMonth() + 1);
+        break;
+
+      case "YEARLY":
+        end.setFullYear(end.getFullYear() + 1);
+        break;
+
+      case "LIFETIME":
+        return null;
+
+      default:
+        throw new AppError("Invalid plan interval");
+    }
+
+    return end;
+  }
+
 }
 
 module.exports = new SubscriptionService();

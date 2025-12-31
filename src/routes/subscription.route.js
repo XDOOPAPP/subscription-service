@@ -7,5 +7,7 @@ router.get("/plans", asyncHandler(controller.getPlans));
 
 router.get("/current", auth, asyncHandler(controller.getCurrent));
 
+router.post("/", auth, asyncHandler(controller.subscribe));
+
 
 module.exports = router;
