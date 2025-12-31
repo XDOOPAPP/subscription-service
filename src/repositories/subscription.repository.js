@@ -9,7 +9,7 @@ class SubscriptionRepository {
   }
 
   findAllByUser(userId) {
-    return Subscription.find({ userId }).populate("planId");
+    return Subscription.find({ userId }).sort({ startDate: -1 }).populate("planId");
   }
 
   expireActive(userId) {

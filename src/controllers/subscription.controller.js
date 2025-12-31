@@ -28,6 +28,12 @@ class SubscriptionController {
     res.json({ message: "Subscription cancelled" });
   };
 
+  // [GET] /api/v1/subscriptions/history
+  history = async (req, res) => {
+    const data = await subscriptionService.getHistory(req.user.userId);
+    res.json(data);
+  };
+
 
 }
 

@@ -11,5 +11,7 @@ router.post("/", auth, asyncHandler(controller.subscribe));
 
 router.post('/cancel', auth, asyncHandler(controller.cancel));
 
+router.get('/history', auth, asyncHandler(controller.history));
+
 
 module.exports = router;

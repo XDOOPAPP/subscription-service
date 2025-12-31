@@ -48,6 +48,10 @@ class SubscriptionService {
     await subscriptionRepository.expireActive(userId);
   }
 
+  async getHistory(userId) {
+    return subscriptionRepository.findAllByUser(userId);
+  }
+
   _calculateEndDate(startDate, interval) {
     const end = new Date(startDate);
 
