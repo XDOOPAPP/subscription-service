@@ -9,5 +9,7 @@ router.get("/current", auth, asyncHandler(controller.getCurrent));
 
 router.post("/", auth, asyncHandler(controller.subscribe));
 
+router.post('/cancel', auth, asyncHandler(controller.cancel));
+
 
 module.exports = router;

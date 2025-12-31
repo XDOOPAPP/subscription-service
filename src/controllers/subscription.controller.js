@@ -15,13 +15,17 @@ class SubscriptionController {
 
   // [POST] /api/v1/subscriptions
   subscribe = async (req, res) => {
-    const userId = "user_005";
-    const planId = "6951600b0f1ca05fb93cbfe7" 
     const sub = await subscriptionService.subscribe(
-      userId,
-      planId
+      req.user.userId,
+      req.body.planId
     );
     res.status(201).json(sub);
+  };
+
+  // [POST] /api/v1/subscriptions/cancel
+  cancel = async (req, res) => {
+    await subscriptionService.cancel(req.user.userId);
+    res.json({ message: "Subscription cancelled" });
   };
 
 

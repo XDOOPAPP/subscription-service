@@ -39,6 +39,15 @@ class SubscriptionService {
     });
   }
 
+  async cancel(userId) {
+    const activeSub = await subscriptionRepository.findActiveByUser(userId);
+    if (!activeSub) {
+      throw new AppError("No active subscription to cancel", 404);
+    }
+
+    await subscriptionRepository.expireActive(userId);
+  }
+
   _calculateEndDate(startDate, interval) {
     const end = new Date(startDate);
 
@@ -60,6 +69,7 @@ class SubscriptionService {
 
     return end;
   }
+
 
 }
 
