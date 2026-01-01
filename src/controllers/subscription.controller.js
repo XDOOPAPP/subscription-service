@@ -50,6 +50,11 @@ class SubscriptionController {
     res.json(plan);
   };
 
+  // [POST] /api/v1/subscriptions/auto-renew
+  toggleAutoRenew = async (req, res) => {
+    const sub = await subscriptionService.toggleAutoRenew(req.user.userId);
+    res.json(sub);
+  };
 
 
 }
