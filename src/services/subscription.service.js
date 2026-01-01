@@ -106,6 +106,9 @@ class SubscriptionService {
     });
   }
 
+  async createPlan(data) {
+    return planRepository.create(data);
+  }
 
 
   // ================= PRIVATE METHODS =================

@@ -73,6 +73,12 @@ class SubscriptionController {
     res.json({ success: true });
   };
 
+  // [POST] /api/v1/subscriptions/plans
+  createPlan = async (req, res) => {
+    const plan = await subscriptionService.createPlan(req.body);
+    res.status(201).json(plan);
+  };
+
 
 }
 

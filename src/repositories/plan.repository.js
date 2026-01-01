@@ -8,6 +8,10 @@ class PlanRepository {
   findById(id) {
     return Plan.findById(id);
   }
+
+  create(data) {
+    return Plan.create(data);
+  }
 }
 
 module.exports = new PlanRepository();

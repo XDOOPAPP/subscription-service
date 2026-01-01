@@ -23,5 +23,7 @@ router.get("/features", auth, asyncHandler(controller.getUserFeatures));
 
 router.post("/payment/success", asyncHandler(controller.paymentSuccess));
 
+router.post("/plans", auth, asyncHandler(controller.createPlan));
+
 
 module.exports = router;
