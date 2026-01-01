@@ -21,5 +21,7 @@ router.post("/auto-renew", auth, asyncHandler(controller.toggleAutoRenew));
 
 router.get("/features", auth, asyncHandler(controller.getUserFeatures));
 
+router.post("/payment/success", asyncHandler(controller.paymentSuccess));
+
 
 module.exports = router;

@@ -84,6 +84,29 @@ class SubscriptionService {
     return sub.planId.features;
   }
 
+  async activateAfterPayment(payload) {
+    const { userId, planId, paymentRef } = payload;
+
+    const plan = await planRepository.findById(planId);
+    if (!plan) throw new AppError("Invalid plan");
+
+    await subscriptionRepository.expireActive(userId);
+
+    const now = new Date();
+    const endDate = this._calculateEndDate(now, plan.interval);
+
+    return subscriptionRepository.create({
+      userId,
+      planId,
+      status: STATUS.ACTIVE,
+      startDate: now,
+      endDate,
+      paymentRef,
+      autoRenew: true
+    });
+  }
+
+
 
   // ================= PRIVATE METHODS =================
 
