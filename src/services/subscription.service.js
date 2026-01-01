@@ -110,6 +110,12 @@ class SubscriptionService {
     return planRepository.create(data);
   }
 
+  async updatePlan(id, data) {
+    const plan = await planRepository.update(id, data);
+    if (!plan) throw new AppError("Plan not found", 404);
+    return plan;
+  }
+
 
   // ================= PRIVATE METHODS =================
 

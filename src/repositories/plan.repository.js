@@ -12,6 +12,11 @@ class PlanRepository {
   create(data) {
     return Plan.create(data);
   }
+
+  update(id, data) {
+    return Plan.findByIdAndUpdate(id, data, { new: true });
+  }
+  
 }
 
 module.exports = new PlanRepository();

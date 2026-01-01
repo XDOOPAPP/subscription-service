@@ -79,6 +79,12 @@ class SubscriptionController {
     res.status(201).json(plan);
   };
 
+  // [PATCH] /api/v1/subscriptions/plans/:id
+  updatePlan = async (req, res) => {
+    const plan = await subscriptionService.updatePlan(req.params.id, req.body);
+    res.json(plan);
+  };
+
 
 }
 

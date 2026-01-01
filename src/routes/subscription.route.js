@@ -25,5 +25,7 @@ router.post("/payment/success", asyncHandler(controller.paymentSuccess));
 
 router.post("/plans", auth, asyncHandler(controller.createPlan));
 
+router.patch("/plans/:id", auth, asyncHandler(controller.updatePlan));
+
 
 module.exports = router;
