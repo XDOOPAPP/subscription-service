@@ -61,6 +61,14 @@ class SubscriptionService {
     return activeSub.planId.features.includes(feature);
   }
 
+  async getPlanDetail(id) {
+    const plan = await planRepository.findById(id);
+    if (!plan || !plan.isActive) {
+      throw new AppError("Plan not found", 404);
+    }
+    return plan;
+  }
+
 
   // ================= PRIVATE METHODS =================
 

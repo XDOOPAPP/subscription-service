@@ -15,5 +15,7 @@ router.get('/history', auth, asyncHandler(controller.history));
 
 router.get("/check", auth, asyncHandler(controller.checkFeature));
 
+router.get("/plans/:id", asyncHandler(controller.getPlanDetail));
+
 
 module.exports = router;

@@ -44,6 +44,13 @@ class SubscriptionController {
     res.json({ allowed });
   };
 
+  // [GET] /api/v1/subscriptions/plans/:id
+  getPlanDetail = async (req, res) => {
+    const plan = await subscriptionService.getPlanDetail(req.params.id);
+    res.json(plan);
+  };
+
+
 
 }
 
