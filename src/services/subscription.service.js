@@ -120,6 +120,9 @@ class SubscriptionService {
     await planRepository.update(id, { isActive: false });
   }
 
+  async getStats() {
+    return subscriptionRepository.aggregateStats();
+  }
 
   // ================= PRIVATE METHODS =================
 

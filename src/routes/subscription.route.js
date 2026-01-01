@@ -29,5 +29,7 @@ router.patch("/plans/:id", auth, asyncHandler(controller.updatePlan));
 
 router.delete("/plans/:id", auth, asyncHandler(controller.disablePlan));
 
+router.get("/admin/stats", auth, asyncHandler(controller.getStats));
+
 
 module.exports = router;

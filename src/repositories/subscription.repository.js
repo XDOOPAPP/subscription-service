@@ -22,6 +22,12 @@ class SubscriptionRepository {
   create(data) {
     return Subscription.create(data);
   }
+
+  aggregateStats() {
+    return Subscription.aggregate([
+      { $group: { _id: "$status", total: { $sum: 1 } } }
+    ]);
+  }
 }
 
 module.exports = new SubscriptionRepository();

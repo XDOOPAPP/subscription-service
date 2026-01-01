@@ -91,6 +91,12 @@ class SubscriptionController {
     res.json({ message: "Plan disabled" });
   };
 
+  // [GET] /api/v1/subscriptions/admin/stats
+  getStats = async (req, res) => {
+    const stats = await subscriptionService.getStats();
+    res.json(stats);
+  };
+
 }
 
 module.exports = new SubscriptionController();
