@@ -52,6 +52,18 @@ class SubscriptionService {
     return subscriptionRepository.findAllByUser(userId);
   }
 
+  async checkFeature(userId, feature) {
+    if (!feature) return false;
+
+    const activeSub = await subscriptionRepository.findActiveByUser(userId);
+    if (!activeSub || !activeSub.planId) return false;
+
+    return activeSub.planId.features.includes(feature);
+  }
+
+
+  // ================= PRIVATE METHODS =================
+
   _calculateEndDate(startDate, interval) {
     const end = new Date(startDate);
 
@@ -73,7 +85,6 @@ class SubscriptionService {
 
     return end;
   }
-
 
 }
 

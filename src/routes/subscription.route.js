@@ -13,5 +13,7 @@ router.post('/cancel', auth, asyncHandler(controller.cancel));
 
 router.get('/history', auth, asyncHandler(controller.history));
 
+router.get("/check", auth, asyncHandler(controller.checkFeature));
+
 
 module.exports = router;

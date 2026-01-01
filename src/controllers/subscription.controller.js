@@ -34,6 +34,16 @@ class SubscriptionController {
     res.json(data);
   };
 
+  // [GET] /api/v1/subscriptions/check
+  checkFeature = async (req, res) => {
+    const { feature } = req.query;
+    const allowed = await subscriptionService.checkFeature(
+      req.user.userId,
+      feature
+    );
+    res.json({ allowed });
+  };
+
 
 }
 
