@@ -78,6 +78,12 @@ class SubscriptionService {
     return sub;
   }
 
+  async getUserFeatures(userId) {
+    const sub = await subscriptionRepository.findActiveByUser(userId);
+    if (!sub || !sub.planId) return [];
+    return sub.planId.features;
+  }
+
 
   // ================= PRIVATE METHODS =================
 
