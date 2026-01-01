@@ -27,5 +27,7 @@ router.post("/plans", auth, asyncHandler(controller.createPlan));
 
 router.patch("/plans/:id", auth, asyncHandler(controller.updatePlan));
 
+router.delete("/plans/:id", auth, asyncHandler(controller.disablePlan));
+
 
 module.exports = router;

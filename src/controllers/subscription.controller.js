@@ -85,6 +85,11 @@ class SubscriptionController {
     res.json(plan);
   };
 
+  // [DELETE] /api/v1/subscriptions/plans/:id
+  disablePlan = async (req, res) => {
+    await subscriptionService.disablePlan(req.params.id);
+    res.json({ message: "Plan disabled" });
+  };
 
 }
 

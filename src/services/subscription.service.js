@@ -116,6 +116,10 @@ class SubscriptionService {
     return plan;
   }
 
+  async disablePlan(id) {
+    await planRepository.update(id, { isActive: false });
+  }
+
 
   // ================= PRIVATE METHODS =================
 
