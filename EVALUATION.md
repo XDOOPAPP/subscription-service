@@ -201,3 +201,4 @@ module.exports = (req, res, next) => {
 
 Subscription Service có **kiến trúc tốt** và **code quality ổn**, nhưng cần cải thiện về **security** (auth middleware) và **completeness** (auto-renewal, validation, testing). Với những cải thiện trên, service sẽ production-ready.
 
+

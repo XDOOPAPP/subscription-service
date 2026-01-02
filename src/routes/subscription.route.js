@@ -31,5 +31,12 @@ router.delete("/plans/:id", auth, asyncHandler(controller.disablePlan));
 
 router.get("/admin/stats", auth, asyncHandler(controller.getStats));
 
+router.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "subscription-service"
+  });
+});
+
 
 module.exports = router;
