@@ -9,6 +9,10 @@ class PlanRepository {
     return Plan.findById(id);
   }
 
+  findFreePlan() {
+    return Plan.findOne({ isActive: true, isFree: true });
+  }
+
   create(data) {
     return Plan.create(data);
   }

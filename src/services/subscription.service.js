@@ -4,6 +4,12 @@ const AppError = require("../utils/appError");
 const STATUS = require("../constants/subscription-status");
 
 class SubscriptionService {
+
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+    this._listenUserCreated();
+  }
+
   async getPlans() {
     return planRepository.findActivePlans();
   }
@@ -107,13 +113,25 @@ class SubscriptionService {
   }
 
   async createPlan(data) {
+    if (data.isFree) {
+      const existingFree = await planRepository.findFreePlan();
+      if (existingFree) {
+        throw new AppError("There is already an active Free plan", 400);
+      }
+    }
     return planRepository.create(data);
   }
 
   async updatePlan(id, data) {
-    const plan = await planRepository.update(id, data);
+    const plan = await planRepository.findById(id);
     if (!plan) throw new AppError("Plan not found", 404);
-    return plan;
+
+    if (plan.isFree && ("isFree" in data || ("isActive" in data && data.isActive === false))) {
+      throw new AppError("Free plan cannot be modified or disabled", 400);
+    }
+    
+    const updated = await planRepository.update(id, data);
+    return updated;
   }
 
   async disablePlan(id) {
@@ -125,6 +143,38 @@ class SubscriptionService {
   }
 
   // ================= PRIVATE METHODS =================
+
+  async _listenUserCreated() {
+    if (!this.eventBus) return;
+
+    await this.eventBus.subscribe("USER_CREATED", async (payload) => {
+      try {
+        const userId = payload.userId;
+
+        const activeSub = await subscriptionRepository.findActiveByUser(userId);
+        if (activeSub) return;
+
+
+        const freePlan = await planRepository.findFreePlan(); 
+        if (!freePlan) return;
+
+        const now = new Date();
+        const endDate = this._calculateEndDate(now, freePlan.interval);
+
+        await subscriptionRepository.create({
+          userId,
+          planId: freePlan._id,
+          status: STATUS.ACTIVE,
+          startDate: now,
+          endDate,
+        });
+
+        console.log("✅ Free subscription created for", userId);
+      } catch (err) {
+        console.error("Error creating free subscription:", err.message);
+      }
+    });
+  }
 
   _calculateEndDate(startDate, interval) {
     const end = new Date(startDate);
@@ -150,4 +200,4 @@ class SubscriptionService {
 
 }
 
-module.exports = new SubscriptionService();
+module.exports = SubscriptionService;

@@ -1,21 +1,26 @@
-const subscriptionService = require("../services/subscription.service");
+const SubscriptionService = require("../services/subscription.service");
 
 class SubscriptionController {
+
+  constructor(eventBus) {
+    this.subscriptionService = new SubscriptionService(eventBus);
+  }
+
   // [GET] /api/v1/subscriptions/plans
   getPlans = async (req, res) => {
-    const plans = await subscriptionService.getPlans();
+    const plans = await this.subscriptionService.getPlans();
     res.json(plans);
   };
 
   // [GET] /api/v1/subscriptions/current
   getCurrent = async (req, res) => {
-    const sub = await subscriptionService.getCurrent(req.user.userId);
+    const sub = await this.subscriptionService.getCurrent(req.user.userId);
     res.json(sub);
   };
 
   // [POST] /api/v1/subscriptions
   subscribe = async (req, res) => {
-    const sub = await subscriptionService.subscribe(
+    const sub = await this.subscriptionService.subscribe(
       req.user.userId,
       req.body.planId
     );
@@ -24,20 +29,20 @@ class SubscriptionController {
 
   // [POST] /api/v1/subscriptions/cancel
   cancel = async (req, res) => {
-    await subscriptionService.cancel(req.user.userId);
+    await this.subscriptionService.cancel(req.user.userId);
     res.json({ message: "Subscription cancelled" });
   };
 
   // [GET] /api/v1/subscriptions/history
   history = async (req, res) => {
-    const data = await subscriptionService.getHistory(req.user.userId);
+    const data = await this.subscriptionService.getHistory(req.user.userId);
     res.json(data);
   };
 
   // [GET] /api/v1/subscriptions/check
   checkFeature = async (req, res) => {
     const { feature } = req.query;
-    const allowed = await subscriptionService.checkFeature(
+    const allowed = await this.subscriptionService.checkFeature(
       req.user.userId,
       feature
     );
@@ -46,19 +51,19 @@ class SubscriptionController {
 
   // [GET] /api/v1/subscriptions/plans/:id
   getPlanDetail = async (req, res) => {
-    const plan = await subscriptionService.getPlanDetail(req.params.id);
+    const plan = await this.subscriptionService.getPlanDetail(req.params.id);
     res.json(plan);
   };
 
   // [POST] /api/v1/subscriptions/auto-renew
   toggleAutoRenew = async (req, res) => {
-    const sub = await subscriptionService.toggleAutoRenew(req.user.userId);
+    const sub = await this.subscriptionService.toggleAutoRenew(req.user.userId);
     res.json(sub);
   };
 
   // [GET] /api/v1/subscriptions/features
   getUserFeatures = async (req, res) => {
-    const features = await subscriptionService.getUserFeatures(req.user.userId);
+    const features = await this.subscriptionService.getUserFeatures(req.user.userId);
     res.json(features);
   };
 
@@ -69,34 +74,34 @@ class SubscriptionController {
     //   "planId": "6951600b0f1ca05fb93cbfe7",
     //   "paymentRef": "MOCK_PAYMENT_001"
     // }
-    await subscriptionService.activateAfterPayment(req.body);
+    await this.subscriptionService.activateAfterPayment(req.body);
     res.json({ success: true });
   };
 
   // [POST] /api/v1/subscriptions/plans
   createPlan = async (req, res) => {
-    const plan = await subscriptionService.createPlan(req.body);
+    const plan = await this.subscriptionService.createPlan(req.body);
     res.status(201).json(plan);
   };
 
   // [PATCH] /api/v1/subscriptions/plans/:id
   updatePlan = async (req, res) => {
-    const plan = await subscriptionService.updatePlan(req.params.id, req.body);
+    const plan = await this.subscriptionService.updatePlan(req.params.id, req.body);
     res.json(plan);
   };
 
   // [DELETE] /api/v1/subscriptions/plans/:id
   disablePlan = async (req, res) => {
-    await subscriptionService.disablePlan(req.params.id);
+    await this.subscriptionService.disablePlan(req.params.id);
     res.json({ message: "Plan disabled" });
   };
 
   // [GET] /api/v1/subscriptions/admin/stats
   getStats = async (req, res) => {
-    const stats = await subscriptionService.getStats();
+    const stats = await this.subscriptionService.getStats();
     res.json(stats);
   };
 
 }
 
-module.exports = new SubscriptionController();
+module.exports = SubscriptionController;

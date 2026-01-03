@@ -1,42 +1,48 @@
 const router = require("express").Router();
 const asyncHandler = require("../utils/asyncHandler");
-const controller = require("../controllers/subscription.controller");
+const Subscontroller = require("../controllers/subscription.controller");
 const auth = require("../middlewares/auth.middleware");
 
-router.get("/plans", asyncHandler(controller.getPlans));
 
-router.get("/current", auth, asyncHandler(controller.getCurrent));
+module.exports = (app) => {
+  const bus = app.get("eventBus"); 
+  const controller = new Subscontroller(bus)
+    
+  router.get("/plans", asyncHandler(controller.getPlans));
 
-router.post("/", auth, asyncHandler(controller.subscribe));
+  router.get("/current", auth, asyncHandler(controller.getCurrent));
 
-router.post('/cancel', auth, asyncHandler(controller.cancel));
+  router.post("/", auth, asyncHandler(controller.subscribe));
 
-router.get('/history', auth, asyncHandler(controller.history));
+  router.post('/cancel', auth, asyncHandler(controller.cancel));
 
-router.get("/check", auth, asyncHandler(controller.checkFeature));
+  router.get('/history', auth, asyncHandler(controller.history));
 
-router.get("/plans/:id", asyncHandler(controller.getPlanDetail));
+  router.get("/check", auth, asyncHandler(controller.checkFeature));
 
-router.post("/auto-renew", auth, asyncHandler(controller.toggleAutoRenew));
+  router.get("/plans/:id", asyncHandler(controller.getPlanDetail));
 
-router.get("/features", auth, asyncHandler(controller.getUserFeatures));
+  router.post("/auto-renew", auth, asyncHandler(controller.toggleAutoRenew));
 
-router.post("/payment/success", asyncHandler(controller.paymentSuccess));
+  router.get("/features", auth, asyncHandler(controller.getUserFeatures));
 
-router.post("/plans", auth, asyncHandler(controller.createPlan));
+  router.post("/payment/success", asyncHandler(controller.paymentSuccess));
 
-router.patch("/plans/:id", auth, asyncHandler(controller.updatePlan));
+  router.post("/plans", auth, asyncHandler(controller.createPlan));
 
-router.delete("/plans/:id", auth, asyncHandler(controller.disablePlan));
+  router.patch("/plans/:id", auth, asyncHandler(controller.updatePlan));
 
-router.get("/admin/stats", auth, asyncHandler(controller.getStats));
+  router.delete("/plans/:id", auth, asyncHandler(controller.disablePlan));
 
-router.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    service: "subscription-service"
+  router.get("/admin/stats", auth, asyncHandler(controller.getStats));
+
+  router.get("/health", (req, res) => {
+    res.status(200).json({
+      status: "ok",
+      service: "subscription-service"
+    });
   });
-});
 
 
-module.exports = router;
+  return router;
+}
