@@ -1,48 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB
-  mongodb:
-    image: mongo:7-jammy
-    container_name: fepa-subscription-mongodb
-    ports:
-      - "27018:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=fepa
-      - MONGO_INITDB_ROOT_PASSWORD=fepa123
-    volumes:
-      - sub_mongodb_data:/data/db
-    networks:
-      - fepa-network
-    healthcheck:
-      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  # RabbitMQ
-  rabbitmq:
-    image: rabbitmq:3.12-management-alpine
-    container_name: fepa-subscription-rabbitmq
-    ports:
-      - "5673:5672"
-      - "15673:15672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=fepa
-      - RABBITMQ_DEFAULT_PASS=fepa123
-    volumes:
-      - sub_rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - fepa-network
-    healthcheck:
-      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  # Subscription Service
   subscription-service:
     build:
       context: .
@@ -53,8 +11,8 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3005
-      - MONGO_URL=mongodb://fepa:fepa123@fepa-subscription-mongodb:27017/fepa_subscription?authSource=admin
-      - RABBITMQ_URL=amqp://fepa:fepa123@fepa-subscription-rabbitmq:5672
+      - MONGO_URL=mongodb://fepa:fepa123@fepa-mongodb:27017/fepa_subscription?authSource=admin
+      - RABBITMQ_URL=amqp://fepa:fepa123@fepa-rabbitmq:5672
       - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-24h}
     depends_on:
@@ -69,7 +27,3 @@ services:
 networks:
   fepa-network:
     external: true
-
-volumes:
-  sub_mongodb_data:
-  sub_rabbitmq_data:
