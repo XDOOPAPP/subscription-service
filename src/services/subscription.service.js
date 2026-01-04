@@ -39,7 +39,7 @@ class SubscriptionService {
     return subscriptionRepository.create({
       userId,
       planId,
-      status: STATUS.ACTIVE,
+      status: STATUS.PENDING,
       startDate: now,
       endDate,
     });
@@ -119,7 +119,18 @@ class SubscriptionService {
         throw new AppError("There is already an active Free plan", 400);
       }
     }
-    return planRepository.create(data);
+    const plan =  planRepository.create(data);
+
+    await this.eventBus.publish("PLAN_CREATED", {
+      planId: plan._id.toString(),
+      name: plan.name,
+      price: plan.price,
+      interval: plan.interval,
+      isActive: plan.isActive,
+      isFree: plan.isFree
+    });
+
+    return plan;
   }
 
   async updatePlan(id, data) {
@@ -131,6 +142,16 @@ class SubscriptionService {
     }
     
     const updated = await planRepository.update(id, data);
+
+    await this.eventBus.publish("PLAN_UPDATED", {
+      planId: plan._id.toString(),
+      name: plan.name,
+      price: plan.price,
+      interval: plan.interval,
+      isActive: plan.isActive,
+      isFree: plan.isFree
+    });
+
     return updated;
   }
 
