@@ -8,6 +8,7 @@ class SubscriptionService {
   constructor(eventBus) {
     this.eventBus = eventBus;
     this._listenUserCreated();
+    this._listenPaymentSuccess();
   }
 
   async getPlans() {
@@ -194,6 +195,24 @@ class SubscriptionService {
       } catch (err) {
         console.error("Error creating free subscription:", err.message);
       }
+    });
+  }
+
+  async _listenPaymentSuccess() {
+    await this.eventBus.subscribe("PAYMENT_SUCCESS", async (payload) => {
+      const { userId, paymentRef } = payload;
+
+      const sub = await subscriptionRepository.findActiveByUser(userId);
+      if (!sub || sub.status !== STATUS.PENDING) return;
+
+      await sub.populate("planId");
+
+      sub.status = STATUS.ACTIVE;
+      sub.paymentRef = paymentRef;
+      sub.startDate = new Date();
+      sub.endDate = this._calculateEndDate(sub.startDate, sub.planId.interval);
+
+      await sub.save();
     });
   }
 
