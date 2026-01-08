@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   subscription-service:
     build:
@@ -15,6 +13,7 @@ services:
       - RABBITMQ_URL=amqp://fepa:fepa123@fepa-rabbitmq:5672
       - JWT_SECRET=${JWT_SECRET:-fepa-key}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-24h}
+      
     networks:
       - fepa-network
     restart: unless-stopped
