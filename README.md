@@ -1,56 +1,60 @@
 # Subscription Service
 
-Dịch vụ quản lý subscription và plans cho hệ thống microservices, hỗ trợ đăng ký, hủy, auto-renewal và quản lý features.
+Dịch vụ quản lý các gói đăng ký (Subscription Plans) cho hệ thống, hỗ trợ đăng ký, gia hạn tự động, nâng cấp/hạ cấp gói, và kiểm tra quyền hạn dựa trên gói dịch vụ.
 
 ## 📋 Tính Năng
 
-- ✅ Quản lý subscription plans (MONTHLY, YEARLY, LIFETIME)
-- ✅ Đăng ký subscription
-- ✅ Hủy subscription
-- ✅ Auto-renewal toggle
-- ✅ Kiểm tra features theo subscription
-- ✅ Lịch sử subscription
-- ✅ Quản lý plans (CRUD) - Admin
-- ✅ Thống kê subscriptions - Admin
-- ✅ Kích hoạt subscription sau payment
-- ✅ Lấy danh sách features của user
+### Subscription Management
+- ✅ **Đăng ký gói mới** (Monthly, Yearly, Lifetime)
+- ✅ **Hủy đăng ký** (Auto-expire khi hết hạn)
+- ✅ **Gia hạn tự động** (Auto-renewal toggle)
+- ✅ **Nâng cấp/Hạ cấp gói** (Change plan)
+- ✅ **Lịch sử đăng ký** (Subscription history)
+
+### Plan Management (Admin)
+- ✅ **CRUD Plans** (Tạo, sửa, xóa, ẩn/hiện gói)
+- ✅ **Quản lý features** cho từng gói
+
+### Integration
+- ✅ **Check Features** (Kiểm tra user có quyền sử dụng tính năng không)
+- ✅ **Payment Integration** (Kích hoạt gói sau khi thanh toán thành công)
+- ✅ **Gateway Auth** (Tin tưởng xác thực từ Gateway)
+- ✅ **RabbitMQ Integration** (Event-driven architecture)
 
 ## 🏗️ Kiến Trúc
 
-Dự án sử dụng **Repository Pattern** và **Service Layer**:
-
 ```
-subscription-service/
-├── index.js                          # Entry point
-├── package.json
-└── src/
-    ├── app.js                        # Express app setup
-    ├── config/
-    │   ├── database.js              # MongoDB connection
-    │   └── env.js                   # Environment config
-    ├── constants/
-    │   └── subscription-status.js   # Status constants
-    ├── controllers/
-    │   └── subscription.controller.js # Request handlers
-    ├── middlewares/
-    │   ├── auth.middleware.js       # JWT verification
-    │   └── errorHandler.middleware.js # Error handler
-    ├── models/
-    │   ├── plan.model.js            # Plan schema
-    │   └── subscription.model.js    # Subscription schema
-    ├── repositories/
-    │   ├── plan.repository.js      # Plan DB operations
-    │   └── subscription.repository.js # Subscription DB operations
-    ├── routes/
-    │   └── subscription.route.js    # Route definitions
-    ├── services/
-    │   └── subscription.service.js   # Business logic
-    └── utils/
-        ├── appError.js              # Custom error class
-        └── asyncHandler.js          # Async error wrapper
+┌─────────────────────────────────────────────────────────────┐
+│                   Subscription Service                       │
+│                                                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
+│  │ Controllers  │───▶│  Services    │───▶│ Repositories │  │
+│  │              │    │              │    │              │  │
+│  │ - sub        │    │ - Business   │    │ - Database   │  │
+│  │ - plan       │    │   Logic      │    │   Queries    │  │
+│  │ - admin      │    │ - EventBus   │    │              │  │
+│  └──────────────┘    └──────────────┘    └──────────────┘  │
+│         │                    │                      │        │
+│         │                    ▼                      ▼        │
+│         │            ┌──────────────┐    ┌──────────────┐  │
+│         │            │   RabbitMQ   │    │   MongoDB    │  │
+│         │            └──────────────┘    │  (Database)  │  │
+│         │                                └──────────────┘  │
+│         ▼                                                   │
+│  ┌──────────────┐                                           │
+│  │  Middleware  │                                           │
+│  │ - Auth       │                                           │
+│  └──────────────┘                                           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+
+- MongoDB 7.0+
+- RabbitMQ 3.12+
 
 ### Local Development
 
@@ -58,9 +62,11 @@ subscription-service/
 # Cài đặt dependencies
 npm install
 
-# Tạo file .env
-PORT=3005
-MONGO_URL=mongodb://localhost:27017/subscription_db
+# Tạo file .env từ template
+cp .env.example .env
+
+# Cấu hình .env (xem phần Environment Variables)
+# Chỉnh sửa file .env với thông tin của bạn
 
 # Chạy development (với auto-reload)
 npm run dev
@@ -69,17 +75,28 @@ npm run dev
 npm start
 ```
 
-### Environment Variables
+## ⚙️ Environment Variables
+
+Tạo file `.env` trong root folder:
 
 ```env
-# Server
+# Server Configuration
 PORT=3005
 
 # Database
-MONGO_URL=mongodb://admin:password@mongodb:27017/subscription_db?authSource=admin
+MONGO_URL=mongodb://localhost:27017/subscription_db
+
+# RabbitMQ
+RABBITMQ_URL=amqp://localhost:5672
 ```
 
-**Lưu ý:** Trong Docker, MongoDB connection string phải dùng service name (`mongodb`), không phải `localhost`.
+### Giải Thích Biến Môi Trường
+
+| Biến | Mô Tả | Ví Dụ |
+|------|-------|-------|
+| `PORT` | Port mà service chạy | `3005` |
+| `MONGO_URL` | MongoDB connection string | `mongodb://localhost:27017/subscription_db` |
+| `RABBITMQ_URL` | RabbitMQ connection string | `amqp://localhost:5672` |
 
 ## 📡 API Endpoints
 
@@ -87,338 +104,142 @@ Base URL: `http://localhost:3005/api/v1/subscriptions`
 
 ### Public Endpoints
 
-| Method | Endpoint | Mô tả | Auth |
+| Method | Endpoint | Mô Tả | Query Params |
+|--------|----------|-------|--------------|
+| `GET` | `/plans` | Lấy danh sách gói đang hoạt động | - |
+| `GET` | `/plans/:id` | Lấy chi tiết gói | Param: `id` |
+| `POST` | `/payment/success` | Callback kích hoạt gói (Internal) | Body: `userId`, `planId`, `paymentRef` |
+
+### Protected Endpoints (Requires `x-user-id`)
+
+| Method | Endpoint | Mô Tả | Body/Params |
+|--------|----------|-------|-------------|
+| `GET` | `/current` | Lấy gói hiện tại của user | - |
+| `POST` | `/` | Đăng ký gói mới | `planId` |
+| `POST` | `/cancel` | Hủy gói hiện tại | - |
+| `POST` | `/auto-renew` | Bật/tắt tự động gia hạn | - |
+| `GET` | `/history` | Xem lịch sử đăng ký | - |
+| `GET` | `/check` | Kiểm tra quyền (Features) | Query: `feature=xxx` |
+
+### Admin Endpoints
+
+| Method | Endpoint | Mô Tả | Auth |
 |--------|----------|-------|------|
-| `GET` | `/plans` | Lấy danh sách plans đang active | ❌ |
-| `GET` | `/plans/:id` | Lấy chi tiết plan | ❌ |
-| `POST` | `/payment/success` | Kích hoạt subscription sau payment | ❌ |
+| `POST` | `/plans` | Tạo gói mới | Admin Only |
+| `PATCH` | `/plans/:id` | Cập nhật gói | Admin Only |
+| `GET` | `/admin/stats` | Thống kê | Admin Only |
 
-### User Endpoints (Require Auth)
+## 📝 API Usage Examples
 
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| `GET` | `/current` | Lấy subscription hiện tại |
-| `POST` | `/` | Đăng ký subscription mới |
-| `POST` | `/cancel` | Hủy subscription |
-| `GET` | `/history` | Lịch sử subscriptions |
-| `GET` | `/check?feature=xxx` | Kiểm tra feature có được phép |
-| `GET` | `/features` | Lấy danh sách features của user |
-| `POST` | `/auto-renew` | Toggle auto-renewal |
-
-### Admin Endpoints (Require Auth)
-
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| `POST` | `/plans` | Tạo plan mới |
-| `PATCH` | `/plans/:id` | Cập nhật plan |
-| `DELETE` | `/plans/:id` | Disable plan |
-| `GET` | `/admin/stats` | Thống kê subscriptions |
-
-## 📝 API Examples
-
-### 1. Lấy Danh Sách Plans
-
-```http
-GET /api/v1/subscriptions/plans
-```
-
-**Response:**
-```json
-[
-  {
-    "_id": "507f1f77bcf86cd799439011",
-    "name": "Premium",
-    "price": 29.99,
-    "interval": "MONTHLY",
-    "features": ["feature1", "feature2", "feature3"],
-    "isFree": false,
-    "isActive": true
-  }
-]
-```
-
-### 2. Đăng Ký Subscription
+### 1. Register Subscription
 
 ```http
 POST /api/v1/subscriptions
-Authorization: Bearer <token>
 Content-Type: application/json
+Authorization: Bearer <token>
 
 {
-  "planId": "507f1f77bcf86cd799439011"
+  "planId": "65a1b2c3d4e5f6g7h8i9j0k1"
 }
 ```
 
 **Response:**
 ```json
 {
-  "_id": "507f1f77bcf86cd799439012",
+  "_id": "65b2c3d4e5f6g7h8i9j0k1l2",
   "userId": "user_123",
   "planId": {
-    "_id": "507f1f77bcf86cd799439011",
-    "name": "Premium",
-    "price": 29.99,
-    "interval": "MONTHLY",
-    "features": ["feature1", "feature2"]
+    "name": "Pro Plan",
+    "price": 200000
   },
   "status": "ACTIVE",
-  "startDate": "2025-12-27T00:00:00.000Z",
-  "endDate": "2026-01-27T00:00:00.000Z",
-  "autoRenew": false
+  "startDate": "2024-01-01T00:00:00.000Z",
+  "endDate": "2024-02-01T00:00:00.000Z"
 }
 ```
 
-### 3. Lấy Subscription Hiện Tại
+### 2. Check Feature Access
 
 ```http
-GET /api/v1/subscriptions/current
+GET /api/v1/subscriptions/check?feature=unlimited_projects
 Authorization: Bearer <token>
 ```
 
-**Response:**
-```json
-{
-  "_id": "507f1f77bcf86cd799439012",
-  "userId": "user_123",
-  "planId": {
-    "_id": "507f1f77bcf86cd799439011",
-    "name": "Premium",
-    "features": ["feature1", "feature2"]
-  },
-  "status": "ACTIVE",
-  "startDate": "2025-12-27T00:00:00.000Z",
-  "endDate": "2026-01-27T00:00:00.000Z"
-}
-```
-
-### 4. Kiểm Tra Feature
-
-```http
-GET /api/v1/subscriptions/check?feature=feature1
-Authorization: Bearer <token>
-```
-
-**Response:**
+**Response (Allowed):**
 ```json
 {
   "allowed": true
 }
 ```
 
-### 5. Hủy Subscription
-
-```http
-POST /api/v1/subscriptions/cancel
-Authorization: Bearer <token>
-```
-
-**Response:**
-```json
-{
-  "message": "Subscription cancelled"
-}
-```
-
-### 6. Toggle Auto-Renewal
-
-```http
-POST /api/v1/subscriptions/auto-renew
-Authorization: Bearer <token>
-```
-
-**Response:**
-```json
-{
-  "_id": "507f1f77bcf86cd799439012",
-  "autoRenew": true
-}
-```
-
-### 7. Kích Hoạt Sau Payment
-
-```http
-POST /api/v1/subscriptions/payment/success
-Content-Type: application/json
-
-{
-  "userId": "user_123",
-  "planId": "507f1f77bcf86cd799439011",
-  "paymentRef": "PAYMENT_REF_001"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true
-}
-```
-
-### 8. Tạo Plan (Admin)
-
-```http
-POST /api/v1/subscriptions/plans
-Authorization: Bearer <admin_token>
-Content-Type: application/json
-
-{
-  "name": "Premium",
-  "price": 29.99,
-  "interval": "MONTHLY",
-  "features": ["feature1", "feature2", "feature3"],
-  "isFree": false,
-  "isActive": true
-}
-```
-
 ## 📊 Database Models
 
-### Plan
+### Subscription Model
 
 ```javascript
 {
-  name: String,
-  price: Number,
-  interval: String (enum: ["MONTHLY", "YEARLY", "LIFETIME"]),
-  features: [String],
-  isFree: Boolean,
-  isActive: Boolean,
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-### Subscription
-
-```javascript
-{
-  userId: String (required),
-  planId: ObjectId (ref: Plan, required),
-  status: String (enum: ["ACTIVE", "CANCELLED", "EXPIRED", "PENDING"]),
+  userId: String,              // ID của user (từ Auth Service)
+  planId: ObjectId,            // Reference tới Plan
+  status: String,              // ACTIVE, EXPIRED, CANCELLED, PENDING
   startDate: Date,
-  endDate: Date (null for LIFETIME),
-  cancelledAt: Date,
-  paymentRef: String,
-  autoRenew: Boolean (default: false),
-  createdAt: Date,
-  updatedAt: Date
+  endDate: Date,               // Null nếu là Lifetime
+  autoRenew: Boolean,          // Mặc định false
+  paymentRef: String,          // Reference tới Payment Service
+  createdAt: Date
 }
 ```
 
-**Indexes:**
-- `{ userId: 1, status: 1 }` - Tối ưu query active subscription
+### Plan Model
 
-## 🔄 Business Logic
-
-### Subscription Flow
-
-1. **Đăng ký:**
-   - User chọn plan → Tạo subscription với status ACTIVE
-   - Tính endDate dựa trên interval (MONTHLY: +1 month, YEARLY: +1 year, LIFETIME: null)
-   - Một user chỉ có thể có 1 subscription ACTIVE
-
-2. **Hủy:**
-   - Đổi status từ ACTIVE → EXPIRED
-   - Lưu cancelledAt timestamp
-
-3. **Auto-Renewal:**
-   - User có thể toggle autoRenew
-   - (Cần job để tự động renew khi endDate đến)
-
-4. **Feature Check:**
-   - Kiểm tra user có subscription ACTIVE
-   - Kiểm tra plan có chứa feature cần check
-
-### Plan Intervals
-
-- **MONTHLY:** EndDate = StartDate + 1 month
-- **YEARLY:** EndDate = StartDate + 1 year
-- **LIFETIME:** EndDate = null (không bao giờ hết hạn)
-
-## 🔐 Authentication
-
-Service sử dụng JWT token từ Authorization header:
-
-```http
-Authorization: Bearer <jwt_token>
+```javascript
+{
+  name: String,                // Tên gói (e.g., Basic, Pro)
+  price: Number,               // Giá tiền
+  interval: String,            // MONTHLY, YEARLY, LIFETIME
+  features: [String],          // Danh sách features
+  isActive: Boolean,           // Cho phép đăng ký mới hay không
+  isFree: Boolean
+}
 ```
 
-**Lưu ý:** Auth middleware hiện tại cần được cải thiện để verify token thực sự (hiện tại chỉ có try-catch rỗng).
+## 🔄 Event-Driven Architecture
 
-## 🚨 Error Handling
+### 1. Published Events
 
-Tất cả errors được xử lý bởi global error handler:
+Service publish các sự kiện thay đổi Plan để các service khác (ví dụ: Payment Service) cập nhật cache:
 
+**Event:** `PLAN_CREATED`, `PLAN_UPDATED`
+**Exchange:** `domain_events`
+**Payload:**
 ```json
 {
-  "message": "Error description"
+  "planId": "65123...",
+  "name": "Pro Plan",
+  "price": 200000,
+  "interval": "MONTHLY",
+  "isActive": true,
+  "isFree": false
 }
 ```
 
-**Common Errors:**
-- `400` - `planId is required` - Thiếu planId
-- `404` - `Plan not found or inactive` - Plan không tồn tại hoặc inactive
-- `404` - `No active subscription to cancel` - Không có subscription để hủy
-- `409` - `User already has an active subscription` - User đã có subscription active
-- `401` - `Invalid token` - Token không hợp lệ
+### 2. Consumed Events
+
+Service lắng nghe các sự kiện để tự động xử lý logic nghiệp vụ:
+
+| Event | Source | Hành Động |
+|-------|--------|-----------|
+| `USER_CREATED` | Auth Service | Tự động đăng ký gói **FREE** cho user mới tạo |
+| `PAYMENT_SUCCESS` | Payment Service | Kích hoạt (`ACTIVE`) subscription đang ở trạng thái `PENDING` |
 
 ## 📦 Dependencies
 
-- **express** - Web framework
-- **mongoose** - MongoDB ODM
-- **cors** - CORS middleware
-- **dotenv** - Environment variables
-- **amqplib** - RabbitMQ client (chưa sử dụng)
-
-## 🔧 Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run with auto-reload
-npm run dev
-
-# Run production
-npm start
-```
-
-## ⚠️ Cần Cải Thiện
-
-### 1. Authentication Middleware
-- Hiện tại auth middleware không verify token thực sự
-- Cần tích hợp với auth-service để verify JWT
-
-### 2. Validation
-- Thiếu input validation (có thể dùng express-validator)
-- Cần validate planId format, userId format
-
-### 3. Auto-Renewal Job
-- Cần cron job để tự động renew subscriptions khi endDate đến
-- Cần job để expire subscriptions đã hết hạn
-
-### 4. Error Handling
-- Cần chi tiết hơn (status code, error codes)
-- Cần logging errors
-
-### 5. Testing
-- Thiếu unit tests
-- Thiếu integration tests
-
-### 6. Docker Setup
-- Chưa có Dockerfile
-- Chưa có docker-compose.yml
-
-### 7. Documentation
-- Cần Swagger/OpenAPI documentation
-- Cần API examples chi tiết hơn
-
-### 8. Security
-- Cần rate limiting
-- Cần input sanitization
-- Cần role-based access control (Admin endpoints)
+| Package | Version | Mô Tả |
+|---------|---------|-------|
+| `express` | ^5.2.1 | Web framework |
+| `mongoose` | ^9.1.1 | MongoDB ODM |
+| `jsonwebtoken` | ^9.0.3 | Token decoding |
+| `amqplib` | ^0.10.3 | RabbitMQ client |
 
 ## 📄 License
 
 ISC
-
