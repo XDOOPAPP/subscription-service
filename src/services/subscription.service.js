@@ -98,7 +98,7 @@ class SubscriptionService {
         throw new AppError("There is already an active Free plan", 400);
       }
     }
-    const plan =  planRepository.create(data);
+    const plan =  await planRepository.create(data);
 
     await this.eventBus.publish("PLAN_CREATED", {
       planId: plan._id.toString(),
