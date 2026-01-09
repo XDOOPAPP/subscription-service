@@ -67,17 +67,6 @@ class SubscriptionController {
     res.json(features);
   };
 
-  // [POST] /api/v1/subscriptions/payment/success
-  paymentSuccess = async (req, res) => {
-    // req.body = {
-    //   "userId": "user_005",
-    //   "planId": "6951600b0f1ca05fb93cbfe7",
-    //   "paymentRef": "MOCK_PAYMENT_001"
-    // }
-    await this.subscriptionService.activateAfterPayment(req.body);
-    res.json({ success: true });
-  };
-
   // [POST] /api/v1/subscriptions/plans
   createPlan = async (req, res) => {
     const plan = await this.subscriptionService.createPlan(req.body);
