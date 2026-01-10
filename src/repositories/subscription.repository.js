@@ -12,10 +12,10 @@ class SubscriptionRepository {
     return Subscription.find({ userId }).sort({ startDate: -1 }).populate("planId");
   }
 
-  expireActive(userId) {
+  cancelActive(userId) {
     return Subscription.updateMany(
       { userId, status: "ACTIVE" },
-      { status: "EXPIRED" }
+      { status: "CANCELLED" }
     );
   }
 
@@ -27,6 +27,10 @@ class SubscriptionRepository {
     return Subscription.aggregate([
       { $group: { _id: "$status", total: { $sum: 1 } } }
     ]);
+  }
+
+  findFilter(filter) {
+    return Subscription.find(filter);
   }
 }
 

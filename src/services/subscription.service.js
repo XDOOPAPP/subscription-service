@@ -52,7 +52,7 @@ class SubscriptionService {
       throw new AppError("No active subscription to cancel", 404);
     }
 
-    await subscriptionRepository.expireActive(userId);
+    await subscriptionRepository.cancelActive(userId);
   }
 
   async getHistory(userId) {
@@ -192,6 +192,32 @@ class SubscriptionService {
 
       await sub.save();
     });
+  }
+
+  async _checkExpiredSubscriptions() {
+    if (!this.eventBus) return;
+
+    // endDate < now
+    const now = new Date();
+    const expiredSubs = await subscriptionRepository.findFilter({
+      status: STATUS.ACTIVE,
+      endDate: { $lte: now },
+    });
+
+    for (const sub of expiredSubs) {
+      sub.status = STATUS.EXPIRED;
+      await sub.save();
+
+      // publish event
+      await this.eventBus.publish("SUBSCRIPTION_EXPIRED", {
+        userId: sub.userId,
+        planId: sub.planId._id.toString(),
+        planName: sub.planId.name,
+        endDate: sub.endDate,
+      });
+
+      console.log(`✅ Subscription expired for user:${sub.userId}`);
+    }
   }
 
   _calculateEndDate(startDate, interval) {
