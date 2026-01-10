@@ -14,8 +14,7 @@ const subscriptionSchema = new mongoose.Schema(
     startDate: Date,
     endDate: Date,
     cancelledAt: Date,
-    paymentRef: String,
-    autoRenew: Boolean
+    paymentRef: String
   },
   { timestamps: true }
 );

@@ -22,8 +22,6 @@ module.exports = (app) => {
 
   router.get("/plans/:id", asyncHandler(controller.getPlanDetail));
 
-  router.post("/auto-renew", auth, asyncHandler(controller.toggleAutoRenew));
-
   router.get("/features", auth, asyncHandler(controller.getUserFeatures));
 
   router.post("/plans", auth, asyncHandler(controller.createPlan));

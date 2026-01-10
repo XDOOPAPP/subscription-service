@@ -76,15 +76,6 @@ class SubscriptionService {
     return plan;
   }
 
-  async toggleAutoRenew(userId) {
-    const sub = await subscriptionRepository.findActiveByUser(userId);
-    if (!sub) throw new AppError("No active subscription", 404);
-
-    sub.autoRenew = !sub.autoRenew;
-    await sub.save();
-    return sub;
-  }
-
   async getUserFeatures(userId) {
     const sub = await subscriptionRepository.findActiveByUser(userId);
     if (!sub || !sub.planId) return [];
@@ -142,7 +133,7 @@ class SubscriptionService {
     return subscriptionRepository.aggregateStats();
   }
 
-  // ================= PRIVATE METHODS =================
+  // ================= METHODS =================
 
   async _listenUserCreated() {
     if (!this.eventBus) return;
