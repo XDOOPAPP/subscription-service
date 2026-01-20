@@ -19,6 +19,16 @@ class SubscriptionService {
     return subscriptionRepository.findActiveByUser(userId);
   }
 
+  async getUserFeatures(userId) {
+    const sub = await subscriptionRepository.findActiveByUser(userId);
+    if (!sub) {
+      // If no subscription, look for free plan
+      const freePlan = await planRepository.findFreePlan();
+      return freePlan ? freePlan.features : { OCR: false, AI: false };
+    }
+    return sub.planId.features;
+  }
+
   async subscribe(userId, planId) {
     if (!planId) {
       throw new AppError("planId is required", 400);
@@ -59,27 +69,12 @@ class SubscriptionService {
     return subscriptionRepository.findAllByUser(userId);
   }
 
-  async checkFeature(userId, feature) {
-    if (!feature) return false;
-
-    const activeSub = await subscriptionRepository.findActiveByUser(userId);
-    if (!activeSub || !activeSub.planId) return false;
-
-    return activeSub.planId.features.includes(feature);
-  }
-
   async getPlanDetail(id) {
     const plan = await planRepository.findById(id);
     if (!plan || !plan.isActive) {
       throw new AppError("Plan not found", 404);
     }
     return plan;
-  }
-
-  async getUserFeatures(userId) {
-    const sub = await subscriptionRepository.findActiveByUser(userId);
-    if (!sub || !sub.planId) return [];
-    return sub.planId.features;
   }
 
   async createPlan(data) {
@@ -89,7 +84,7 @@ class SubscriptionService {
         throw new AppError("There is already an active Free plan", 400);
       }
     }
-    const plan =  await planRepository.create(data);
+    const plan = await planRepository.create(data);
 
     await this.eventBus.publish("PLAN_CREATED", {
       planId: plan._id.toString(),
@@ -110,16 +105,16 @@ class SubscriptionService {
     if (plan.isFree && ("isFree" in data || ("isActive" in data && data.isActive === false))) {
       throw new AppError("Free plan cannot be modified or disabled", 400);
     }
-    
+
     const updated = await planRepository.update(id, data);
 
     await this.eventBus.publish("PLAN_UPDATED", {
-      planId: plan._id.toString(),
-      name: plan.name,
-      price: plan.price,
-      interval: plan.interval,
-      isActive: plan.isActive,
-      isFree: plan.isFree
+      planId: updated._id.toString(),
+      name: updated.name,
+      price: updated.price,
+      interval: updated.interval,
+      isActive: updated.isActive,
+      isFree: updated.isFree
     });
 
     return updated;
@@ -146,7 +141,7 @@ class SubscriptionService {
         if (activeSub) return;
 
 
-        const freePlan = await planRepository.findFreePlan(); 
+        const freePlan = await planRepository.findFreePlan();
         if (!freePlan) return;
 
         const now = new Date();

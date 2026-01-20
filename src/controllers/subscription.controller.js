@@ -18,6 +18,13 @@ class SubscriptionController {
     res.json(sub);
   };
 
+  // [GET] api/v1/internal/user-features/:userId
+  getUserFeatures = async (req, res) => {
+    const userId = req.params.userId || req.user.userId;
+    const features = await this.subscriptionService.getUserFeatures(userId);
+    res.json(features);
+  };
+
   // [POST] /api/v1/subscriptions
   subscribe = async (req, res) => {
     const sub = await this.subscriptionService.subscribe(
@@ -39,26 +46,10 @@ class SubscriptionController {
     res.json(data);
   };
 
-  // [GET] /api/v1/subscriptions/check
-  checkFeature = async (req, res) => {
-    const { feature } = req.query;
-    const allowed = await this.subscriptionService.checkFeature(
-      req.user.userId,
-      feature
-    );
-    res.json({ allowed });
-  };
-
   // [GET] /api/v1/subscriptions/plans/:id
   getPlanDetail = async (req, res) => {
     const plan = await this.subscriptionService.getPlanDetail(req.params.id);
     res.json(plan);
-  };
-
-  // [GET] /api/v1/subscriptions/features
-  getUserFeatures = async (req, res) => {
-    const features = await this.subscriptionService.getUserFeatures(req.user.userId);
-    res.json(features);
   };
 
   // [POST] /api/v1/subscriptions/plans

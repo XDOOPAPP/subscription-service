@@ -5,12 +5,13 @@ const auth = require("../middlewares/auth.middleware");
 
 
 module.exports = (app) => {
-  const bus = app.get("eventBus"); 
+  const bus = app.get("eventBus");
   const controller = new Subscontroller(bus)
-    
+
   router.get("/plans", asyncHandler(controller.getPlans));
 
   router.get("/current", auth, asyncHandler(controller.getCurrent));
+  router.get("/internal/user-features/:userId", asyncHandler(controller.getUserFeatures));
 
   router.post("/", auth, asyncHandler(controller.subscribe));
 
@@ -18,11 +19,7 @@ module.exports = (app) => {
 
   router.get('/history', auth, asyncHandler(controller.history));
 
-  router.get("/check", auth, asyncHandler(controller.checkFeature));
-
   router.get("/plans/:id", asyncHandler(controller.getPlanDetail));
-
-  router.get("/features", auth, asyncHandler(controller.getUserFeatures));
 
   router.post("/plans", auth, asyncHandler(controller.createPlan));
 

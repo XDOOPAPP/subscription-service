@@ -8,7 +8,10 @@ const planSchema = new mongoose.Schema(
       type: String,
       enum: ["MONTHLY", "YEARLY", "LIFETIME"]
     },
-    features: [String],
+    features: {
+      OCR: { type: Boolean, default: false },
+      AI: { type: Boolean, default: false },
+    },
     isFree: Boolean,
     isActive: Boolean
   },
