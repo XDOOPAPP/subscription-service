@@ -87,8 +87,6 @@ Service chạy mặc định tại `http://localhost:3005`.
 | `POST` | `/api/v1/subscriptions` | Đăng ký gói mới (Body: `{ "planId": "..." }`) |
 | `POST` | `/api/v1/subscriptions/cancel` | Hủy subscription hiện tại |
 | `GET` | `/api/v1/subscriptions/history` | Xem lịch sử đăng ký |
-| `GET` | `/api/v1/subscriptions/features` | Lấy danh sách tính năng được phép dùng |
-| `GET` | `/api/v1/subscriptions/check?feature=NAME` | Kiểm tra quyền truy cập một tính năng cụ thể |
 
 ### Admin (Quản Lý Gói)
 
@@ -117,7 +115,10 @@ x-user-id: admin-id-123
   "name": "Premium Plan",
   "price": 99000,
   "interval": "MONTHLY",
-  "features": ["no-ads", "4k-streaming"],
+  "features": {
+    "AI": true,
+    "OCR": true
+  },
   "isActive": true
 }
 ```
@@ -129,7 +130,10 @@ x-user-id: admin-id-123
   "name": "Premium Plan",
   "price": 99000,
   "interval": "MONTHLY",
-  "features": ["no-ads", "4k-streaming"],
+  "features": {
+    "AI": true,
+    "OCR": true
+  },
   "isActive": true,
   "createdAt": "2024-01-01T00:00:00.000Z"
 }
@@ -194,21 +198,6 @@ x-user-id: user-id-123
     "name": "Premium Plan",
     "price": 99000
   }
-}
-```
-
-#### Step 3: Check Feature Access
-Kiểm tra xem user có quyền dùng tính năng nào đó không (dựa trên gói đã đăng ký).
-
-```http
-GET /api/v1/subscriptions/check?feature=no-ads
-x-user-id: user-id-123
-```
-
-**Response:**
-```json
-{
-  "allowed": true
 }
 ```
 
