@@ -11,6 +11,7 @@ module.exports = (app) => {
   router.get("/plans", asyncHandler(controller.getPlans));
 
   router.get("/current", auth, asyncHandler(controller.getCurrent));
+
   router.get("/internal/user-features/:userId", asyncHandler(controller.getUserFeatures));
 
   router.post("/", auth, asyncHandler(controller.subscribe));
@@ -28,6 +29,13 @@ module.exports = (app) => {
   router.delete("/plans/:id", auth, asyncHandler(controller.disablePlan));
 
   router.get("/admin/stats", auth, asyncHandler(controller.getStats));
+
+  // Revenue Statistics Routes
+  router.get("/stats/revenue-over-time", auth, asyncHandler(controller.getRevenueOverTime));
+
+  router.get("/stats/total-revenue", auth, asyncHandler(controller.getTotalRevenueStats));
+
+  router.get("/stats/revenue-by-plan", auth, asyncHandler(controller.getRevenueByPlan));
 
   router.get("/health", (req, res) => {
     res.status(200).json({

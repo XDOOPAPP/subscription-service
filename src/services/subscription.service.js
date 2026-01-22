@@ -240,6 +240,28 @@ class SubscriptionService {
     return end;
   }
 
+  // Revenue Statistics Methods
+
+  async getRevenueOverTime(period = 'daily', days = 30) {
+    const stats = await subscriptionRepository.getRevenueOverTime(period, days);
+    return {
+      period,
+      days,
+      data: stats
+    };
+  }
+
+  async getTotalRevenueStats() {
+    return await subscriptionRepository.getTotalRevenueStats();
+  }
+
+  async getRevenueByPlan() {
+    const stats = await subscriptionRepository.getRevenueByPlan();
+    return {
+      data: stats
+    };
+  }
+
 }
 
 module.exports = SubscriptionService;

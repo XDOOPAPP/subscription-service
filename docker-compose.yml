@@ -13,11 +13,6 @@ services:
       - RABBITMQ_URL=amqp://fepa:fepa123@fepa-rabbitmq:5672
       - JWT_SECRET=${JWT_SECRET:-fepa-key}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-24h}
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     networks:
       - fepa-network
     restart: unless-stopped

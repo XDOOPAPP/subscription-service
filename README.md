@@ -5,20 +5,20 @@ Microservice quản lý gói đăng ký (Subscription), kế hoạch (Plans), v�
 ## ✨ Tính Năng
 
 - **Quản Lý Gói (Plans)**:
-    - Tạo, cập nhật, vô hiệu hóa các gói dịch vụ (Monthly, Yearly, Lifetime).
-    - Tùy chỉnh giá, tính năng, và trạng thái.
+  - Tạo, cập nhật, vô hiệu hóa các gói dịch vụ (Monthly, Yearly, Lifetime).
+  - Tùy chỉnh giá, tính năng, và trạng thái.
 - **Quản Lý Subscription**:
-    - Đăng ký gói mới.
-    - Hủy gói hiện tại.
-    - Tự động kích hoạt Free Plan cho user mới.
-    - Kiểm tra tính năng (Feature Gating).
+  - Đăng ký gói mới.
+  - Hủy gói hiện tại.
+  - Tự động kích hoạt Free Plan cho user mới.
+  - Kiểm tra tính năng (Feature Gating).
 - **Tự Động Hóa**:
-    - Cron job kiểm tra và xử lý subscription hết hạn (chạy mỗi 5 phút).
-    - Tự động cập nhật trạng thái khi thanh toán thành công.
+  - Cron job kiểm tra và xử lý subscription hết hạn (chạy mỗi 5 phút).
+  - Tự động cập nhật trạng thái khi thanh toán thành công.
 - **Event-Driven**:
-    - Tích hợp RabbitMQ để giao tiếp với các service khác (`auth-service`, `payment-service`).
-    - Lắng nghe sự kiện: `USER_CREATED`, `PAYMENT_SUCCESS`.
-    - Phát sự kiện: `PLAN_CREATED`, `PLAN_UPDATED`, `SUBSCRIPTION_EXPIRED`.
+  - Tích hợp RabbitMQ để giao tiếp với các service khác (`auth-service`, `payment-service`).
+  - Lắng nghe sự kiện: `USER_CREATED`, `PAYMENT_SUCCESS`.
+  - Phát sự kiện: `PLAN_CREATED`, `PLAN_UPDATED`, `SUBSCRIPTION_EXPIRED`.
 
 ## 🛠️ Tech Stack
 
@@ -71,31 +71,39 @@ Service chạy mặc định tại `http://localhost:3005`.
 
 ### Public
 
-| Method | Endpoint | Mô tả |
-| :--- | :--- | :--- |
-| `GET` | `/api/v1/subscriptions/plans` | Lấy danh sách các gói đang hoạt động |
-| `GET` | `/api/v1/subscriptions/plans/:id` | Xem chi tiết một gói |
-| `GET` | `/api/v1/subscriptions/health` | Kiểm tra trạng thái service |
+| Method | Endpoint                          | Mô tả                                |
+| :----- | :-------------------------------- | :----------------------------------- |
+| `GET`  | `/api/v1/subscriptions/plans`     | Lấy danh sách các gói đang hoạt động |
+| `GET`  | `/api/v1/subscriptions/plans/:id` | Xem chi tiết một gói                 |
+| `GET`  | `/api/v1/subscriptions/health`    | Kiểm tra trạng thái service          |
 
 ### User (Yêu cầu Authentication)
 
 > **Lưu ý**: Các request cần header `x-user-id` (từ Gateway)
 
-| Method | Endpoint | Mô tả |
-| :--- | :--- | :--- |
-| `GET` | `/api/v1/subscriptions/current` | Lấy thông tin subscription hiện tại |
-| `POST` | `/api/v1/subscriptions` | Đăng ký gói mới (Body: `{ "planId": "..." }`) |
-| `POST` | `/api/v1/subscriptions/cancel` | Hủy subscription hiện tại |
-| `GET` | `/api/v1/subscriptions/history` | Xem lịch sử đăng ký |
+| Method | Endpoint                        | Mô tả                                         |
+| :----- | :------------------------------ | :-------------------------------------------- |
+| `GET`  | `/api/v1/subscriptions/current` | Lấy thông tin subscription hiện tại           |
+| `POST` | `/api/v1/subscriptions`         | Đăng ký gói mới (Body: `{ "planId": "..." }`) |
+| `POST` | `/api/v1/subscriptions/cancel`  | Hủy subscription hiện tại                     |
+| `GET`  | `/api/v1/subscriptions/history` | Xem lịch sử đăng ký                           |
 
 ### Admin (Quản Lý Gói)
 
-| Method | Endpoint | Mô tả |
-| :--- | :--- | :--- |
-| `POST` | `/api/v1/subscriptions/plans` | Tạo gói mới |
-| `PATCH` | `/api/v1/subscriptions/plans/:id` | Cập nhật gói |
-| `DELETE` | `/api/v1/subscriptions/plans/:id` | Vô hiệu hóa gói |
-| `GET` | `/api/v1/subscriptions/admin/stats` | Xem thống kê subscription |
+| Method   | Endpoint                            | Mô tả                     |
+| :------- | :---------------------------------- | :------------------------ |
+| `POST`   | `/api/v1/subscriptions/plans`       | Tạo gói mới               |
+| `PATCH`  | `/api/v1/subscriptions/plans/:id`   | Cập nhật gói              |
+| `DELETE` | `/api/v1/subscriptions/plans/:id`   | Vô hiệu hóa gói           |
+| `GET`    | `/api/v1/subscriptions/admin/stats` | Xem thống kê subscription |
+
+### Admin (Thống Kê Doanh Thu)
+
+| Method | Endpoint                                        | Mô tả                            |
+| :----- | :---------------------------------------------- | :------------------------------- |
+| `GET`  | `/api/v1/subscriptions/stats/revenue-over-time` | Biểu đồ doanh thu theo thời gian |
+| `GET`  | `/api/v1/subscriptions/stats/total-revenue`     | Tổng doanh thu và thống kê       |
+| `GET`  | `/api/v1/subscriptions/stats/revenue-by-plan`   | Doanh thu theo từng gói          |
 
 ## 📝 API Usage Examples
 
@@ -106,6 +114,7 @@ Bạn có thể test trực tiếp bằng Postman hoặc Thunder Client.
 ### 1. Create Plan Flow (Admin)
 
 #### Step 1: Create a new Plan
+
 ```http
 POST /api/v1/subscriptions/plans
 Content-Type: application/json
@@ -124,6 +133,7 @@ x-user-id: admin-id-123
 ```
 
 **Response:**
+
 ```json
 {
   "_id": "65a1b2c3d4e5... (plan_id)",
@@ -140,11 +150,13 @@ x-user-id: admin-id-123
 ```
 
 #### Step 2: Get All Plans
+
 ```http
 GET /api/v1/subscriptions/plans
 ```
 
 **Response:**
+
 ```json
 [
   {
@@ -159,6 +171,7 @@ GET /api/v1/subscriptions/plans
 ### 2. User Subscription Flow
 
 #### Step 1: Subscribe to a Plan
+
 Lấy `_id` từ kết quả tạo gói (User Flow) để đăng ký.
 
 ```http
@@ -172,6 +185,7 @@ x-user-id: user-id-123
 ```
 
 **Response:**
+
 ```json
 {
   "_id": "65b2c3d4e5f6... (sub_id)",
@@ -184,12 +198,14 @@ x-user-id: user-id-123
 ```
 
 #### Step 2: Check Current Subscription
+
 ```http
 GET /api/v1/subscriptions/current
 x-user-id: user-id-123
 ```
 
 **Response:**
+
 ```json
 {
   "_id": "65b2c3d4e5f6...",
@@ -204,12 +220,14 @@ x-user-id: user-id-123
 ### 3. Management Flow
 
 #### Cancel Subscription
+
 ```http
 POST /api/v1/subscriptions/cancel
 x-user-id: user-id-123
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Subscription cancelled"
@@ -217,12 +235,14 @@ x-user-id: user-id-123
 ```
 
 #### View History
+
 ```http
 GET /api/v1/subscriptions/history
 x-user-id: user-id-123
 ```
 
 **Response:**
+
 ```json
 [
   {
@@ -232,6 +252,97 @@ x-user-id: user-id-123
     "startDate": "..."
   }
 ]
+```
+
+### 4. Revenue Statistics Flow (Admin)
+
+#### Get Revenue Over Time
+
+Lấy doanh thu theo thời gian (hỗ trợ daily, weekly, monthly).
+
+```http
+GET /api/v1/subscriptions/stats/revenue-over-time?period=daily&days=30
+x-user-id: admin-id-123
+```
+
+**Query Parameters:**
+
+- `period` (optional): 'daily' | 'weekly' | 'monthly', default: 'daily'
+- `days` (optional): Số ngày quay lại, default: 30
+
+**Response:**
+
+```json
+{
+  "period": "daily",
+  "days": 30,
+  "data": [
+    {
+      "_id": "2024-01-15",
+      "totalRevenue": 500000,
+      "subscriptionCount": 5
+    },
+    {
+      "_id": "2024-01-16",
+      "totalRevenue": 750000,
+      "subscriptionCount": 7
+    }
+  ]
+}
+```
+
+#### Get Total Revenue Statistics
+
+Tổng doanh thu và thống kê subscription toàn bộ hệ thống.
+
+```http
+GET /api/v1/subscriptions/stats/total-revenue
+x-user-id: admin-id-123
+```
+
+**Response:**
+
+```json
+{
+  "totalRevenue": 5000000,
+  "activeSubscriptions": 50,
+  "cancelledSubscriptions": 5,
+  "totalSubscriptions": 55
+}
+```
+
+#### Get Revenue By Plan
+
+Phân tích doanh thu theo từng gói dịch vụ(Hiển thị theo doanh thu từ cao đến thấp).
+
+```http
+GET /api/v1/subscriptions/stats/revenue-by-plan
+x-user-id: admin-id-123
+```
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "_id": {
+        "planId": "65a1b2c3d4e5...",
+        "planName": "Premium Plan"
+      },
+      "totalRevenue": 3000000,
+      "subscriptionCount": 30
+    },
+    {
+      "_id": {
+        "planId": "65a1b2c3d4e5...",
+        "planName": "Standard Plan"
+      },
+      "totalRevenue": 2000000,
+      "subscriptionCount": 25
+    }
+  ]
+}
 ```
 
 ## 🏗️ Cấu Trúc Project

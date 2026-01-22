@@ -76,6 +76,25 @@ class SubscriptionController {
     res.json(stats);
   };
 
+  // [GET] /api/v1/subscriptions/stats/revenue-over-time
+  getRevenueOverTime = async (req, res) => {
+    const { period = 'daily', days = 30 } = req.query;
+    const result = await this.subscriptionService.getRevenueOverTime(period, parseInt(days));
+    res.json(result);
+  };
+
+  // [GET] /api/v1/subscriptions/stats/total-revenue
+  getTotalRevenueStats = async (req, res) => {
+    const result = await this.subscriptionService.getTotalRevenueStats();
+    res.json(result);
+  };
+
+  // [GET] /api/v1/subscriptions/stats/revenue-by-plan
+  getRevenueByPlan = async (req, res) => {
+    const result = await this.subscriptionService.getRevenueByPlan();
+    res.json(result);
+  };
+
 }
 
 module.exports = SubscriptionController;
