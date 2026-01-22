@@ -121,6 +121,11 @@ class SubscriptionService {
   }
 
   async disablePlan(id) {
+    const plan = await planRepository.findById(id);
+    if (plan.isFree) {
+      throw new AppError("Free plan cannot be disabled", 400);
+    }
+    
     await planRepository.update(id, { isActive: false });
   }
 

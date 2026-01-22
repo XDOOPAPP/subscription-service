@@ -4,16 +4,20 @@ const env = require("./src/config/env");
 const EventBus = require("./src/infra/event-bus/event-bus");
 const subscriptionRoutes = require("./src/routes/subscription.route");
 const SubscriptionService = require("./src/services/subscription.service");
+const seedFreePlan = require("./src/utils/seedFreePlan");
 
 (async () => {
   // 1. connect database
   await connectDB();
 
-  // 2. connect event bus
+  // 2. seed free plan
+  await seedFreePlan();
+
+  // 3. connect event bus
   const bus = new EventBus(env.rabbitMQ_url);
   await bus.connect();
 
-  // 3. inject bus for app
+  // 4. inject bus for app
   app.set("eventBus", bus);
 
   //--- IGNORE ---
@@ -27,10 +31,10 @@ const SubscriptionService = require("./src/services/subscription.service");
       .catch(err => console.error("Error checking expired subscriptions:", err));
   }, 1000 * 60 * 5); // every 5 minutes
 
-  // 4. user route
+  // 5. user route
   app.use("/api/v1/subscriptions", subscriptionRoutes(app));
 
-  // 5. start server
+  // 6. start server
   app.listen(env.port, () => {
     console.log(`Subscription Service running on port ${env.port}`);
   });
