@@ -5,6 +5,10 @@ class PlanRepository {
     return Plan.find({ isActive: true });
   }
 
+  findAllPlans() {
+    return Plan.find({});
+  }
+
   findById(id) {
     return Plan.findById(id);
   }
@@ -20,7 +24,7 @@ class PlanRepository {
   update(id, data) {
     return Plan.findByIdAndUpdate(id, data, { new: true });
   }
-  
+
 }
 
 module.exports = new PlanRepository();

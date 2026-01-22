@@ -125,7 +125,19 @@ class SubscriptionService {
   }
 
   async getStats() {
-    return subscriptionRepository.aggregateStats();
+    const result = await subscriptionRepository.aggregateStats();
+    const plans = await planRepository.findAllPlans();
+    const stats = {};
+    plans.forEach(plan => {
+      stats[plan._id.toString()] = {
+        name: plan.name,
+        count: 0
+      };
+    });
+    result.forEach(stat => {
+      stats[stat._id.toString()].count = stat.total;
+    });
+    return stats;
   }
 
   // ================= METHODS =================

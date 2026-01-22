@@ -25,7 +25,7 @@ class SubscriptionRepository {
 
   aggregateStats() {
     return Subscription.aggregate([
-      { $group: { _id: "$status", total: { $sum: 1 } } }
+      { $group: { _id: "$planId", total: { $sum: 1 } } }
     ]);
   }
 
