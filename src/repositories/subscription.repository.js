@@ -34,70 +34,104 @@ class SubscriptionRepository {
   }
 
   async getRevenueOverTime(period = 'daily', days = 30) {
-    const now = new Date();
-    const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    // Validate input
+    const allowedPeriods = ['daily', 'weekly', 'monthly'];
+    if (!allowedPeriods.includes(period)) period = 'daily';
 
-    let groupFormat;
-    if (period === 'daily') {
-      groupFormat = { 
-        $dateToString: 
-        { 
-          format: '%Y-%m-%d', 
-          date: '$createdAt' 
-        } 
-      };
-    } else if (period === 'weekly') {
-      groupFormat = { 
-        $week: '$createdAt', 
-        $year: '$createdAt' 
-      };
-    } else if (period === 'monthly') {
-      groupFormat = { 
-        $dateToString: { 
-          format: '%Y-%m', 
-          date: '$createdAt' 
-        } 
-      };
-    } else {
-      groupFormat = { 
-        $dateToString: { 
-          format: '%Y-%m-%d', 
-          date: '$createdAt' 
-        } 
-      };
+    days = Number(days);
+    if (isNaN(days) || days <= 0) days = 30;
+
+    const now = new Date(); // UTC
+    const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    const timezone = 'Asia/Ho_Chi_Minh';
+
+    let groupId;
+    let sortStage = {};
+
+    switch (period) {
+      case 'daily':
+        groupId = {
+          $dateToString: {
+            format: '%Y-%m-%d',
+            date: '$createdAt',
+            timezone
+          }
+        };
+        sortStage = { _id: 1 };
+        break;
+
+      case 'weekly':
+        groupId = {
+          year: { $isoWeekYear: '$createdAt' },
+          week: { $isoWeek: '$createdAt' }
+        };
+        sortStage = { '_id.year': 1, '_id.week': 1 };
+        break;
+
+      case 'monthly':
+        groupId = {
+          $dateToString: {
+            format: '%Y-%m',
+            date: '$createdAt',
+            timezone
+          }
+        };
+        sortStage = { _id: 1 };
+        break;
+
+      default:
+        groupId = {
+          $dateToString: {
+            format: '%Y-%m-%d',
+            date: '$createdAt',
+            timezone
+          }
+        };
+        sortStage = { _id: 1 };
     }
 
     const result = await Subscription.aggregate([
       {
-        $match: { // filter by createdAt and status
+        $match: {
           createdAt: { $gte: startDate, $lte: now },
           status: { $in: ['ACTIVE', 'CANCELLED', 'EXPIRED'] }
         }
       },
       {
-        $lookup: { // join with plans collection
+        $lookup: {
           from: 'plans',
           localField: 'planId',
           foreignField: '_id',
           as: 'plan'
         }
       },
-      {
-        $unwind: '$plan' // chose object inbtead of array
-      },
+      { $unwind: '$plan' },
       {
         $group: {
-          _id: groupFormat,
+          _id: groupId,
           totalRevenue: { $sum: '$plan.price' },
           subscriptionCount: { $sum: 1 }
         }
       },
-      {
-        $sort: { _id: 1 }
-      }
+      { $sort: sortStage }
     ]);
 
-    return result;
+    // Format output
+    return result.map(item => {
+      if (period === 'weekly') {
+        return {
+          period: `${item._id.year}-W${item._id.week}`,
+          totalRevenue: item.totalRevenue,
+          subscriptionCount: item.subscriptionCount
+        };
+      }
+
+      return {
+        period: item._id,
+        totalRevenue: item.totalRevenue,
+        subscriptionCount: item.subscriptionCount
+      };
+    });
   }
 
   async getTotalRevenueStats() {
